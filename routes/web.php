@@ -26,10 +26,9 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::group(['middleware'=>'cors','prefix' => 'api'], function () {
   Route::get('login','APIControllerv1@loginProc');
-  //Route::get('loginProc','APIControllerv1@loginProc');
   Route::get('signup','APIControllerv1@signup');
   Route::get('change_password','APIControllerv1@change_password');
-  Route::get('reset_password','APIControllerv1@reset_password');
+  //Route::get('reset_password','APIControllerv1@reset_password');
   Route::get('generateOTP','APIControllerv1@generateOTP');
   Route::get('streamCam','APIControllerv1@streamCam');
 });
