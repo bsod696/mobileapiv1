@@ -15,22 +15,16 @@ function ImageCheck($ext){
     return $ext;
 }
 
-function send_reset_password($to, $subject, $name, $message,$hash){
-  $setting = Setting::first();
-
-  $headers = "From: ".$setting->name." <".$setting->infoemail."> \r\n";
-  $headers .= "Reply-To: ".$setting->title." <".$setting->infoemail."> \r\n";
-  $headers .= "MIME-Version: 1.0\r\n";
-  $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-
-  $template = $setting->template_reset_password;
-  $mm = str_replace("{{name}}",$name,$template);
-  $supportemail = str_replace("{{supportemail}}",$setting->supportemail,$mm);
-  $url = str_replace("{{url}}",$setting->url.'password/reset/'.$hash , $supportemail);
-  $message = str_replace("{{message}}",$message,$url);
-  mail($to, $subject, $message, $headers);
-
+function send_reset_password($to, $name, $message,$hash){
+  $msgData = array(
+    "uname" => $name,
+    "msg" => $message,
+    "hash" => $hash
+  );
+  // dd($to, $msgData);
+  Mail::to($to)->send(new ForgotPasswordMail($msgData));
 }
+
 
 function apiToken($session_uid){
   $key=md5('FaceSec'.$session_uid);

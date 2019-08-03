@@ -162,28 +162,33 @@ class APIControllerv1 extends Controller
 		}
 	}
 
-	##FORGOT PASSWORD##
-	public function reset_password(Request $request) {                         
-		$email = $request->email;
-		$sql_email = User::where('email',$email)->count();
+	// ##FORGOT PASSWORD##
+	// public function reset_password(Request $request) {                         
+	// 	$email = $request->email;
+	// 	$sql_email = User::where('email',$email)->count();
 
-		if($sql_email==0) {  
-			$msg = array("text"=>"No such user with this email address.");
-			$datamsg = response()->json([
-				'error' => $msg
-			]);
-			return $datamsg->content();
-		}
-		else {
-			//whatsapp code
+	// 	if($sql_email==0) {  
+	// 		$msg = array("text"=>"No such user with this email address.");
+	// 		$datamsg = response()->json([
+	// 			'error' => $msg
+	// 		]);
+	// 		return $datamsg->content();
+	// 	}
+	// 	else {
+	// 		//whatsapp code
+	// 		$userData = User::where('email', $sql_email)->first();
+	// 		$name = $userData->fullname;
+	// 		$message = "Click on the link to reset password.";
+	// 		$hash =  hash('sha256', $sql_email);
+	// 		send_reset_password($sql_email, $name, $message, $hash);
 
-			$msg = array("text"=>"Email with instructions to reset password was sent. Please check your inbox.");
-			$datamsg = response()->json([
-				'success' => $msg
-			]);
-			return $datamsg->content();
-		}
-	}
+	// 		$msg = array("text"=>"Email with instructions to reset password was sent. Please check your inbox.");
+	// 		$datamsg = response()->json([
+	// 			'success' => $msg
+	// 		]);
+	// 		return $datamsg->content();
+	// 	}
+	// }
 
 	##OTP##
 	public function generateOTP(Request $request) {

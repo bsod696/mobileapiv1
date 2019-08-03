@@ -16,9 +16,11 @@ class ForgotPasswordMail extends Mailable
      *
      * @return void
      */
-    public function __construct()
+    public $msgData;
+
+    public function __construct($msgData)
     {
-        //
+        $this->msgData = $msgData;
     }
 
     /**
@@ -28,6 +30,14 @@ class ForgotPasswordMail extends Mailable
      */
     public function build()
     {
-        return $this->view('view.name');
+        $address = "admin@google.com";
+        $name = "System Admin";
+        $subject = "Forgot Password Request";
+        return $this->view('email.template_send_forgot_pass')
+                ->with($this->msgData)
+                ->from($address,$name)
+                ->replyTo($address,$name)
+                ->subject($subject);
+       
     }
 }
