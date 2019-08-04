@@ -77,6 +77,7 @@ class APIControllerv2 extends Controller
 			$PIN = $request->PIN;
 			$house = $request->house;
 			$studentmail = $request->studentmail;
+			$password = $request->password;
 			$studentid = $request->studentid;
 			$temporaryPIN = $request->temporaryPIN;
 
