@@ -82,8 +82,8 @@ class APIControllerv2 extends Controller
 			$temporaryPIN = $request->temporaryPIN;
 
 			$email_check = preg_match('~^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.([a-zA-Z]{2,4})$~i', $studentmail);
-			if(!isValidEmail($email)) { echo '{"error":{"text":"Please enter valid email address."}}'; }
-			elseif(strlen($password)<3) { echo '{"error":{"text":"Password must be 3 characters only."}}'; }
+			if(!isValidEmail($studentmail)) { echo '{"result":{"text":"Please enter valid email address."}}'; }
+			elseif(strlen($password)<3) { echo '{"result":{"text":"Password must be 3 characters only."}}'; }
 			else{  
 				$userData = '';
 				$mainCount = User::where('studentid',$studentid)->orWhere('studentmail',$studentmail)->count();
@@ -141,6 +141,7 @@ class APIControllerv2 extends Controller
 		$check_users = User::where('studentmail', $studentmail)->where('access_type','U')->count();
 		$onecode = '';
 		if($check_users != 0){
+			for($i = 0; $i < 2; $i++) {$temporaryPIN .= mt_rand(0, 9);}
 			$user = User::where('studentmail',$studentmail)->update(['temporaryPIN' => $temporaryPIN]);
 			$userData = User::where('studentmail',$studentmail)->first();
 			$systemToken = apiToken($userData->id);
@@ -170,26 +171,16 @@ class APIControllerv2 extends Controller
 
 	##STREAMING CAMERA##
 	public function streamCam(Request $request) {
-		$up = StreamLink::where("status", "ACTIVE")->update(['status' => "ACTIVE"]);
-		$linkcheck = StreamLink::where('status', 'ACTIVE')->count();
-		if($linkcheck != 0){
-			$linkdata = StreamLink::where('status', 'ACTIVE')->first();
-			$msg = array(
-				"link"=>$linkdata->strlink, 
-				"status"=>$linkdata->status
-			);
-			$datamsg = response()->json([
-				'userData' => $msg
-			]);
-			return $datamsg->content();
-		}
-		else{
-			$msg = array("text"=>"No active stream link available.");
-			$datamsg = response()->json([
-				'result' => $msg
-			]);
-			return $datamsg->content();
-		}
+		$up = StreamLink::where("status", "INACTIVE")->update(['status' => "ACTIVE"]);
+		$linkdata = StreamLink::where('status', 'ACTIVE')->first();
+		$msg = array(
+			"link"=>$linkdata->strlink, 
+			"status"=>$linkdata->status
+		);
+		$datamsg = response()->json([
+			'result' => $msg
+		]);
+		return $datamsg->content();
 	}
 	public function stopCam(Request $request) {
 		$up = StreamLink::where("status", "ACTIVE")->update(['status' => "INACTIVE"]);
