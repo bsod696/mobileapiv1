@@ -11,11 +11,13 @@ class APIControllerv3 extends Controller
 {
 	##LOGIN##
 	public function loginProc(Request $request){
+		$studentmail = $request->studentmail;
+		$password = $request->password
 		$userData = '';
-		$user = User::Where('studentmail',$request->studentmail)->count();
+		$user = User::Where('studentmail',$studentmail)->count();
 
 		if($user != 0){
-			$userData = User::Where('studentmail',$request->studentmail)->first();
+			$userData = User::Where('studentmail',$studentmail)->first();
 			
 			if($userData->access_type == "U"){$level = '1';}
 			else{$level = '0';}
@@ -26,7 +28,7 @@ class APIControllerv3 extends Controller
 			}
 
 			if($userData->password != ""){
-				$login_data = User::where('studentmail',$request->studentmail)->first();
+				$login_data = User::where('studentmail',$studentmail)->first();
 
 				if($login_data->access_type == "G"){	
 					$msg = array("text"=>"Your account was blocked from this access. Please contact with administrator.");
@@ -36,8 +38,8 @@ class APIControllerv3 extends Controller
 					return $datamsg->content();
 				}
 				else{
-					if(Hash::check($request->password, $userData->password)){
-						$login_datas = User::where('studentmail',$request->studentmail)->first();
+					if(Hash::check($password, $userData->password)){
+						$login_datas = User::where('studentmail',$studentmail)->first();
 						$msg = array(
 							"PIN"=>$userData->PIN, 
 							"house"=>$userData->house, 
@@ -137,23 +139,36 @@ class APIControllerv3 extends Controller
 		$studentmail = $request->studentmail;
 		$studentid = $request->studentid;
 		$temporaryPIN = $request->temporaryPIN;
+		$mobile = $request->mobile 
 			
 		$check_users = User::where('studentmail', $studentmail)->where('access_type','U')->count();
 		$onecode = '';
 		if($check_users != 0){
 			for($i = 0; $i < 2; $i++) {$temporaryPIN .= mt_rand(0, 9);}
-			$user = User::where('studentmail',$studentmail)->update(['temporaryPIN' => $temporaryPIN]);
-			$userData = User::where('studentmail',$studentmail)->first();
-			$systemToken = apiToken($userData->id);
-			$msg = array(
-				"PIN"=>$userData->PIN, 
+			$userData = User::where('studentmail',$studentmail)->first();	
+			//$user = User::where('studentmail',$studentmail)->update(['temporaryPIN' => $temporaryPIN]);
+			$user = User::create([
+				"PIN"=>"noaccess", 
 				"house"=>$userData->house, 
 				"studentmail"=>$userData->studentmail,
-				"password"=>$userData->password,  
+				"password"=>"noaccess",  
 				"studentid"=>$userData->studentid,
-				"temporaryPIN"=>$userData->temporaryPIN,
-				"access_type"=>$userData->access_type,
-				"token"=>$userData->token
+				"temporaryPIN"=>$temporaryPIN,
+				"mobile" => $mobile,
+				"access_type" => "G",
+				"token" => "guestentryonly"
+			]);
+			$systemToken = apiToken($userData->id);
+			$msg = array(
+				"PIN"=>"noaccess", 
+				"house"=>$userData->house, 
+				"studentmail"=>$userData->studentmail,
+				"password"=>"noaccess",  
+				"studentid"=>$userData->studentid,
+				"temporaryPIN"=>$temporaryPIN,
+				"mobile" => $mobile,
+				"access_type" => "G",
+				"token" => "guestentryonly"
 			);
 			$datamsg = response()->json([
 				'result' => $msg
