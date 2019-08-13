@@ -13,10 +13,12 @@
 
 
 -- Dumping database structure for mobileapiv1
+DROP DATABASE IF EXISTS `mobileapiv1`;
 CREATE DATABASE IF NOT EXISTS `mobileapiv1` /*!40100 DEFAULT CHARACTER SET latin1 */;
 USE `mobileapiv1`;
 
 -- Dumping structure for table mobileapiv1.guest_access
+DROP TABLE IF EXISTS `guest_access`;
 CREATE TABLE IF NOT EXISTS `guest_access` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `studentid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -30,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `guest_access` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
--- Dumping data for table mobileapiv1.guest_access: ~1 rows (approximately)
+-- Dumping data for table mobileapiv1.guest_access: ~2 rows (approximately)
 DELETE FROM `guest_access`;
 /*!40000 ALTER TABLE `guest_access` DISABLE KEYS */;
 INSERT INTO `guest_access` (`id`, `studentid`, `studentmail`, `house`, `temporaryPIN`, `mobile`, `access_type`, `created_at`, `updated_at`) VALUES
@@ -39,6 +41,7 @@ INSERT INTO `guest_access` (`id`, `studentid`, `studentmail`, `house`, `temporar
 /*!40000 ALTER TABLE `guest_access` ENABLE KEYS */;
 
 -- Dumping structure for table mobileapiv1.migrations
+DROP TABLE IF EXISTS `migrations`;
 CREATE TABLE IF NOT EXISTS `migrations` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -55,6 +58,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 
 -- Dumping structure for table mobileapiv1.password_resets
+DROP TABLE IF EXISTS `password_resets`;
 CREATE TABLE IF NOT EXISTS `password_resets` (
   `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -68,6 +72,7 @@ DELETE FROM `password_resets`;
 /*!40000 ALTER TABLE `password_resets` ENABLE KEYS */;
 
 -- Dumping structure for table mobileapiv1.stream_det
+DROP TABLE IF EXISTS `stream_det`;
 CREATE TABLE IF NOT EXISTS `stream_det` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `strlink` text DEFAULT NULL,
@@ -77,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `stream_det` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mobileapiv1.stream_det: ~0 rows (approximately)
+-- Dumping data for table mobileapiv1.stream_det: ~1 rows (approximately)
 DELETE FROM `stream_det`;
 /*!40000 ALTER TABLE `stream_det` DISABLE KEYS */;
 INSERT INTO `stream_det` (`id`, `strlink`, `status`, `created_at`, `updated_at`) VALUES
@@ -85,6 +90,7 @@ INSERT INTO `stream_det` (`id`, `strlink`, `status`, `created_at`, `updated_at`)
 /*!40000 ALTER TABLE `stream_det` ENABLE KEYS */;
 
 -- Dumping structure for table mobileapiv1.users
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `studentid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
