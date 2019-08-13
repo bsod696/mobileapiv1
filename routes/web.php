@@ -17,9 +17,9 @@ header('Access-Control-Allow-Headers: Content-Type, x-xsrf-token, x_csrftoken');
 Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['middleware'=>'cors','prefix' => 'api'], function () {
-  Route::get('login','APIControllerv2@loginProc');
-  Route::get('signup','APIControllerv2@signup');
-  Route::get('generateOTP','APIControllerv2@generateOTP');
-  Route::get('streamCam','APIControllerv2@streamCam');
-  Route::get('stopCam','APIControllerv2@stopCam');
+  Route::get('login','APIControllerv3@loginProc');
+  Route::get('signup','APIControllerv3@signup');
+  Route::get('generateOTP','APIControllerv3@generateOTP');
+  Route::get('streamCam','APIControllerv3@streamCam');
+  Route::get('stopCam','APIControllerv3@stopCam');
 });
