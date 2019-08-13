@@ -21,9 +21,7 @@ class User extends Authenticatable
         'studentmail', 
         'password', 
         'studentid', 
-        'temporaryPIN', 
-        'access_type',
-        'token'
+        'access_type'
     ];
 
     /**

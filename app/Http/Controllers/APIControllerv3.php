@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
 use App\User;
+use App\Guest;
 use App\StreamLink;
 
 class APIControllerv3 extends Controller
@@ -12,25 +14,23 @@ class APIControllerv3 extends Controller
 	##LOGIN##
 	public function loginProc(Request $request){
 		$studentmail = $request->studentmail;
-		$password = $request->password
-		$userData = '';
+		$password = $request->password;
 		$user = User::Where('studentmail',$studentmail)->count();
 
 		if($user != 0){
 			$userData = User::Where('studentmail',$studentmail)->first();
 			
-			if($userData->access_type == "U"){$level = '1';}
+			if($userData->access_type == "OWNER"){$level = '1';}
 			else{$level = '0';}
 
 			if(!empty($userData)){
 				$studentid=$userData->studentid;
-				$userData->token = apiToken($studentid);
 			}
 
 			if($userData->password != ""){
 				$login_data = User::where('studentmail',$studentmail)->first();
 
-				if($login_data->access_type == "G"){	
+				if($login_data->access_type == "GUEST"){	
 					$msg = array("text"=>"Your account was blocked from this access. Please contact with administrator.");
 					$datamsg = response()->json([
 						'result' => $msg
@@ -47,8 +47,7 @@ class APIControllerv3 extends Controller
 							"password"=>$userData->password,  
 							"studentid"=>$userData->studentid,
 							"temporaryPIN"=>$userData->temporaryPIN,
-							"access_type"=>$userData->access_type,
-							"token"=>$userData->token
+							"access_type"=>$userData->access_type
 						);
 						$datamsg = response()->json([
 							'result' => $msg
@@ -79,43 +78,31 @@ class APIControllerv3 extends Controller
 			$PIN = $request->PIN;
 			$house = $request->house;
 			$studentmail = $request->studentmail;
-			$password = $request->password;
 			$studentid = $request->studentid;
-			$temporaryPIN = $request->temporaryPIN;
-
+			
 			$email_check = preg_match('~^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.([a-zA-Z]{2,4})$~i', $studentmail);
 			if(!isValidEmail($studentmail)) { echo '{"result":{"text":"Please enter valid email address."}}'; }
-			elseif(strlen($password)<3) { echo '{"result":{"text":"Password must be 3 characters only."}}'; }
 			else{  
 				$userData = '';
-				$mainCount = User::where('studentid',$studentid)->orWhere('studentmail',$studentmail)->count();
-				$created=time();
+				$mainCount = User::where('studentmail',$studentmail)->count();
+				//dd($mainCount);
 				if($mainCount==0){
-					$hash = sha1($studentmail);
-					
 					$user = User::create([
 						'PIN' => $PIN,
 						'house' => $house,
 						'studentmail' => $studentmail,
-						'password' =>  bcrypt($password),
 						'studentid' => $studentid,
-						'temporaryPIN' => $temporaryPIN,
-						'access_type' => 'U',
-						'token' => ''
+						'password' => "noaccess",
+						'access_type' => 'OWNER'
 					]);
 
 					$userData = User::where('studentmail',$studentmail)->first();
-					$systemToken = apiToken($userData->studentid);
-					$user = User::where('studentmail',$studentmail)->update(['token' => $systemToken]);
 					$msg = array(
 							"PIN"=>$userData->PIN, 
 							"house"=>$userData->house, 
 							"studentmail"=>$userData->studentmail,
-							"password"=>$userData->password,  
 							"studentid"=>$userData->studentid,
-							"temporaryPIN"=>$userData->temporaryPIN,
-							"access_type"=>$userData->access_type,
-							"token"=>$userData->token
+							"access_type"=>$userData->access_type
 					);
 					$datamsg = response()->json([
 						'result' => $msg
@@ -123,13 +110,81 @@ class APIControllerv3 extends Controller
 					return $datamsg->content();
 				}
 				else {
-					$msg = array("text"=>"This username or email has already been used. Please enter another.");
+					$user = User::where('studentmail',$studentmail)->update([
+						'PIN' => $PIN,
+						'house' => $house,
+						'studentmail' => $studentmail,
+						'studentid' => $studentid,
+						'access_type' => 'OWNER'
+					]);
+
+					$userData = User::where('studentmail',$studentmail)->first();
+					$msg = array(
+							"PIN"=>$userData->PIN, 
+							"house"=>$userData->house, 
+							"studentmail"=>$userData->studentmail,
+							"studentid"=>$userData->studentid,
+							"access_type"=>$userData->access_type
+					);
 					$datamsg = response()->json([
 						'result' => $msg
 					]);
 					return $datamsg->content();
 				}
 			}
+	}
+
+	##UPDATE PIN##
+	public function updatePIN(Request $request) {
+		$studentmail = $request->studentmail;
+		$PIN = $request->PIN;
+		$check_users = User::where('studentmail', $studentmail)->where('access_type','OWNER')->count();
+
+		if($check_users != 0){
+			$user = User::where('studentmail',$studentmail)->update(['PIN' => $PIN]);
+			$userData = User::where('studentmail',$studentmail)->first();
+			$msg = array(
+				"PIN"=>$userData->PIN, 
+				"house"=>$userData->house, 
+				"studentmail"=>$userData->studentmail,
+				"studentid"=>$userData->studentid,
+			);
+			$datamsg = response()->json([
+				'result' => $msg
+			]);
+			return $datamsg->content();
+		}
+		else{
+			$msg = array("text"=>"Not authorized");
+			$datamsg = response()->json([
+				'result' => $msg
+			]);
+			return $datamsg->content();
+		}
+	}
+
+	##LIST GUEST ACCESS##
+	public function guestHistory(Request $request) {
+		$studentmail = $request->studentmail;
+		$check_users = User::where('studentmail', $studentmail)->where('access_type','OWNER')->count();
+
+		if($check_users != 0){
+			$guestData = Guest::where('studentmail',$studentmail)->get();
+			$msg = array(
+				"guestData"=>$guestData
+			);
+			$datamsg = response()->json([
+				'result' => $msg
+			]);
+			return $datamsg->content();
+		}
+		else{
+			$msg = array("text"=>"Not authorized");
+			$datamsg = response()->json([
+				'result' => $msg
+			]);
+			return $datamsg->content();
+		}
 	}
 
 	##OTP##
@@ -139,36 +194,32 @@ class APIControllerv3 extends Controller
 		$studentmail = $request->studentmail;
 		$studentid = $request->studentid;
 		$temporaryPIN = $request->temporaryPIN;
-		$mobile = $request->mobile 
-			
-		$check_users = User::where('studentmail', $studentmail)->where('access_type','U')->count();
-		$onecode = '';
+		$mobile = $request->mobile; 
+		$check_users = User::where('studentmail', $studentmail)->where('access_type','OWNER')->count();
 		if($check_users != 0){
-			for($i = 0; $i < 2; $i++) {$temporaryPIN .= mt_rand(0, 9);}
+			//for($i = 0; $i < 2; $i++) {$temporaryPIN .= mt_rand(0, 9);}
 			$userData = User::where('studentmail',$studentmail)->first();	
 			//$user = User::where('studentmail',$studentmail)->update(['temporaryPIN' => $temporaryPIN]);
-			$user = User::create([
+			$guest = Guest::create([
 				"PIN"=>"noaccess", 
-				"house"=>$userData->house, 
-				"studentmail"=>$userData->studentmail,
+				"house"=>$house, 
+				"studentmail"=>$studentmail,
 				"password"=>"noaccess",  
-				"studentid"=>$userData->studentid,
+				"studentid"=>$studentid,
 				"temporaryPIN"=>$temporaryPIN,
 				"mobile" => $mobile,
-				"access_type" => "G",
-				"token" => "guestentryonly"
+				"access_type" => "GUEST",
+				"access_date" => Carbon::now()
 			]);
-			$systemToken = apiToken($userData->id);
 			$msg = array(
 				"PIN"=>"noaccess", 
-				"house"=>$userData->house, 
-				"studentmail"=>$userData->studentmail,
+				"house"=>$house, 
+				"studentmail"=>$studentmail,
 				"password"=>"noaccess",  
-				"studentid"=>$userData->studentid,
+				"studentid"=>$studentid,
 				"temporaryPIN"=>$temporaryPIN,
 				"mobile" => $mobile,
-				"access_type" => "G",
-				"token" => "guestentryonly"
+				"access_type" => "GUEST"
 			);
 			$datamsg = response()->json([
 				'result' => $msg
@@ -186,19 +237,20 @@ class APIControllerv3 extends Controller
 
 	##STREAMING CAMERA##
 	public function streamCam(Request $request) {
-		$id = $request->id;
-		$userData = User::where('id',$id)->where('access_type', 'U')->first();
+		$studentmail = $request->studentmail;
+		$userData = User::where('studentmail',$studentmail)->where('access_type', 'OWNER')->first();
 
 		if(!empty($userData)){
+			$up = StreamLink::where("status", "INACTIVE")->update(['status' => "ACTIVE"]);
 			$linkcheck = StreamLink::where('status', 'ACTIVE')->count();
 			if($linkcheck != 0){
-				$up = StreamLink::where("status", "INACTIVE")->update(['status' => "ACTIVE"]);
 				$linkdata = StreamLink::where('status', 'ACTIVE')->first();
 				$msg = array(
 					"link"=>$linkdata->strlink, 
 					"status"=>$linkdata->status, 
 					"username"=>$userData->username, 
 					"access_type"=>$userData->access_type
+				);
 				$datamsg = response()->json([
 					'result' => $msg
 				]);
@@ -221,8 +273,8 @@ class APIControllerv3 extends Controller
 		}
 	}
 	public function stopCam(Request $request) {
-		$id = $request->id;
-		$userData = User::where('id',$id)->where('access_type', 'U')->first();
+		$studentmail = $request->studentmail;
+		$userData = User::where('studentmail',$studentmail)->where('access_type', 'OWNER')->first();
 
 		if(!empty($userData)){
 			$up = StreamLink::where("status", "ACTIVE")->update(['status' => "INACTIVE"]);
