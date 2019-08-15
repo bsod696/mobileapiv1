@@ -163,6 +163,18 @@ class APIControllerv3 extends Controller
 		}
 	}
 
+	##DELETE TEMPORARY PIN##
+	public function deletePIN(Request $request) {
+		$temporaryPIN = $request->temporaryPIN;
+		$del = Guest::where('temporaryPIN', $temporaryPIN)->update(['temporaryPIN' => 'EXPIRED']);
+
+		$msg = array("text"=>"temporaryPIN expired");
+		$datamsg = response()->json([
+			'result' => $msg
+		]);
+		return $datamsg->content();
+	}
+
 	##LIST GUEST ACCESS##
 	public function guestHistory(Request $request) {
 		$studentmail = $request->studentmail;
