@@ -165,8 +165,8 @@ class APIControllerv3 extends Controller
 
 	##DELETE TEMPORARY PIN##
 	public function deletePIN(Request $request) {
-		$temporaryPIN = $request->temporaryPIN;
-		$del = Guest::where('temporaryPIN', $temporaryPIN)->update(['temporaryPIN' => 'EXPIRED']);
+		$mobile = $request->mobile;
+		$del = Guest::where('mobile', $mobile)->update(['temporaryPIN' => 'EXPIRED']);
 
 		$msg = array("text"=>"temporaryPIN expired");
 		$datamsg = response()->json([
