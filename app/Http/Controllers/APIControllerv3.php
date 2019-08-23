@@ -137,10 +137,9 @@ class APIControllerv3 extends Controller
 	##DELETE USER##
 	public function deleteUser(Request $request) {
 		$studentmail = $request->studentmail;
-		$delusr=User::where('studentmail',$studentmail)->delete();
-		$userData=User::where('studentmail',$studentmail)->first();
-
-		$msg = array("text"=>"User with student ID ".$userData->studentid." deleted.");
+		$delusr = User::where('studentmail',$studentmail)->delete();
+		
+		$msg = array("text"=>"User deleted.");
 		$datamsg = response()->json([
 			'result' => $msg
 		]);
